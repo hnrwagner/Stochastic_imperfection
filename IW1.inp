@@ -1,0 +1,93 @@
+*HEADING
+ IW1 - quasi-static Newton-Raphson
+**################################################################
+-------
+** Geometry
+**--------------------------------
+*NODE,INPUT=IW1_Nodes.txt
+*NODE
+   99998,0.,0.,0.
+   99999,0.,0.,100.0
+*TRANSFORM, TYPE=C, NSET=ALL
+          0.,          0.,          0.,          0.,          0.,          1.
+**------------------------------------------------------- 
+*ELEMENT, TYPE=S4R, ELSET=ESHELL,INPUT=elements.txt
+**-------------------------------------------------------
+*ORIENTATION, SYSTEM=C, NAME=OID11
+ 0., 0., 0., 0., 0., 1.
+ 1, 90.
+**--------------------------------------------------------
+*SHELL SECTION, COMPOSITE, ELSET=ESHELL, ORIENTATION=OID11
+ 0.0125, 3, Steel, 45.
+ 0.0125, 3, Steel, -45
+ 0.0125, 3, Steel, 0
+ 0.0125, 3, Steel, 90
+ 0.0125, 3, Steel, 90
+ 0.0125, 3, Steel, 0
+ 0.0125, 3, Steel, -45
+ 0.0125, 3, Steel, 45
+**-------------------------------------------------------
+*MATERIAL,NAME=Steel
+*ELASTIC, TYPE=LAMINA
+ 208000, 208000, 0.3, 80000, 80000, 80000
+*DENSITY
+ 7.8E-9,
+**-------------------------------------------------------
+*DAMPING, BETA=0., ALPHA=100.
+**-------------------------------------------------------
+*BOUNDARY, OP=NEW
+ RP-2, 1,6,0.
+ RP-1, 1,2,0.
+ RP-1, 4,6,0.
+ RP-1, 3, 3, 1.
+**-------------------------------------------------------
+*RIGID BODY,REF NODE=99999,TIE NSET=Set-Top_EDGE
+*RIGID BODY,REF NODE=99998,TIE NSET=Set-Bottom_EDGE
+**-------------------------------------------------------
+*NSET, NSET=Set-Bottom_EDGE, GENERATE
+   1, 240, 1
+*NSET,NSET=Set-Top_EDGE,GENERATE
+  14401, 14640, 1
+*ELSET,ELSET=ALLEL,GENERATE
+ 1, 14400, 1
+*NSET,NSET=ALL,GENERATE
+ 1, 14640, 1
+*NSET,NSET=RP-1
+ 99998,
+*NSET,NSET=RP-2
+ 99999,
+**$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+**$ Loading $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+**$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+*STEP, NLGEOM, INC=300
+*STATIC
+ 0.001, 1.0, , 0.01
+**  
+** BOUNDARY CONDITIONS
+** Name: BC-4 Type: Displacement/Rotation
+*Boundary
+RP-1, 3, 3, 1.
+** 
+** OUTPUT REQUESTS
+** 
+*Restart, write, overlay, frequency=1
+*Monitor, dof=3, node=Monitor-1, frequency=1
+** 
+** FIELD OUTPUT: F-Output-1
+** 
+*Output, field
+*Node Output
+RT, UT, S, MISES
+** 
+** HISTORY OUTPUT: H-Output-1
+** 
+*Output, history, variable=PRESELECT
+**-----------------------
+*OUTPUT,HISTORY,OP=ADD,FREQUENCY=1
+*NODE OUTPUT,NSET=REF_U
+ RF3,
+*NODE OUTPUT,NSET=REF_O
+ RF3, CF3, U3
+*RESTART, WRITE, OVERLAY
+*MONITOR, NODE=14640, DOF=3
+*END STEP
